@@ -24,17 +24,125 @@ datasource db {
 }
 
 enum UserRole {
-  STAFF
-  MANAGER
+  ADMIN     
+  HR        
+  EMPLOYEE  
 }
 
 model User {
   id                    Int        @id @default(autoincrement())
-  fullname              String     
+  fullName              String     
   email                 String     @unique
   password              String
-  role                  UserRole   @default(STAFF)
+  role                  UserRole   @default(EMPLOYEE)
   hashedRefreshToken    String?     
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
+
+  employee           Employee?
+}
+
+model Department {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique  // "Engineering", "Sales"...
+  description String?
+  managerId   Int?      @unique 
+  budget      Decimal?  @db.Decimal(15, 2)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  employees   Employee[]
+  manager     Employee? @relation("DepartmentManager", fields: [managerId], references: [id])
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+}
+
+model Employee {
+  id           Int            @id @default(autoincrement())
+  userId       Int            @unique
+  employeeCode String         @unique
+  phone        String?
+  avatar       String?
+  position     String         // "Software Engineer", "HR Manager"...
+  departmentId Int
+  salary       Decimal?       @db.Decimal(15, 2)
+  hireDate     DateTime
+  status       EmployeeStatus @default(ACTIVE)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  // Relations
+  user              User        @relation(fields: [userId], references: [id])
+  department        Department  @relation(fields: [departmentId], references: [id])
+  managedDepartment Department? @relation("DepartmentManager")
+  attendances       Attendance[]
+  leaveRequests     LeaveRequest[] @relation("EmployeeLeaves")
+  reviewedLeaves    LeaveRequest[] @relation("ReviewerLeaves")
+}
+
+enum AttendanceStatus {
+  ON_TIME      
+  LATE         
+  EARLY_LEAVE  
+  OVERTIME     
+  ABSENT      
+}
+
+model Attendance {
+  id           Int              @id @default(autoincrement())
+  employeeId   Int
+  date         DateTime         @db.Date
+  checkIn      DateTime?
+  checkOut     DateTime?
+  workingHours Decimal?         @db.Decimal(4, 2)  // 8.50 = 8.5 giờ
+  status       AttendanceStatus @default(ON_TIME)
+  note         String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  // Relations
+  employee     Employee         @relation(fields: [employeeId], references: [id])
+
+  // 1 nhân viên chỉ có 1 record mỗi ngày
+  @@unique([employeeId, date])
+}
+
+enum LeaveType {
+  ANNUAL      // Nghỉ phép năm
+  SICK        // Nghỉ bệnh
+  MATERNITY   // Nghỉ thai sản
+  UNPAID      // Nghỉ không lương
+}
+
+enum LeaveStatus {
+  PENDING     // Chờ duyệt
+  APPROVED    // Đã duyệt
+  REJECTED    // Từ chối
+}
+
+model LeaveRequest {
+  id          Int         @id @default(autoincrement())
+  employeeId  Int
+  type        LeaveType
+  startDate   DateTime    @db.Date
+  endDate     DateTime    @db.Date
+  totalDays   Int         // Tính từ startDate - endDate
+  reason      String
+  status      LeaveStatus @default(PENDING)
+  reviewerId  Int?        // HR/Admin người duyệt, nullable vì chưa duyệt
+  reviewNote  String?     // Lý do reject hoặc ghi chú khi duyệt
+  submittedAt DateTime    @default(now())
+  reviewedAt  DateTime?   // Null cho đến khi được duyệt/reject
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  employee    Employee    @relation("EmployeeLeaves", fields: [employeeId], references: [id])
+  reviewer    Employee?   @relation("ReviewerLeaves", fields: [reviewerId], references: [id])
 }

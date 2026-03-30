@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
   Inject,
@@ -15,7 +16,6 @@ import { JwtService } from '@nestjs/jwt';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import type { ConfigType } from '@nestjs/config';
 import * as argon2 from 'argon2';
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -38,12 +38,12 @@ export class AuthService {
     }
 
     // 2. Hash Password
-    const hashedPassword = await hashPassword(registerDto.password);
+    const hashedPassword: string = await hashPassword(registerDto.password);
 
     // 3. Create new user
     const newUser = await this.usersService.createUser({
       email: registerDto.email,
-      fullname: registerDto.fullName,
+      fullName: registerDto.fullName,
       password: hashedPassword,
     });
 
@@ -67,7 +67,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const { password, ...user } = existingUser;
+    const { password, hashedRefreshToken, ...user } = existingUser;
 
     return user;
   }
@@ -84,7 +84,7 @@ export class AuthService {
     );
 
     return {
-      user_id: user.id,
+      user,
       access_token,
       refresh_token,
     };
@@ -108,7 +108,6 @@ export class AuthService {
   }
 
   async generateTokens(user: any) {
-    // return user;
     const payload = { id: user.id, email: user.email, role: user.role };
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload),

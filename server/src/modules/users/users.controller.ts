@@ -1,4 +1,5 @@
-import { Controller, Get, Req, SetMetadata, UseGuards } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserRole } from 'generated/prisma/enums';
