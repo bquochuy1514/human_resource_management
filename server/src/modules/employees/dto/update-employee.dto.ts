@@ -1,4 +1,32 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateEmployeeDto } from './create-employee.dto';
+import { EmployeeStatus } from 'generated/prisma/enums';
+import { IsEnum, IsOptional, IsString, IsInt, IsNumber } from 'class-validator';
 
-export class UpdateEmployeeDto extends PartialType(CreateEmployeeDto) {}
+export class UpdateEmployeeDto {
+  @IsOptional()
+  @IsString()
+  fullName?: string;
+
+  @IsOptional()
+  @IsString()
+  position?: string;
+
+  @IsOptional()
+  @IsInt()
+  departmentId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  salary?: number;
+
+  @IsOptional()
+  @IsEnum(EmployeeStatus)
+  status?: EmployeeStatus;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  avatar?: string;
+}

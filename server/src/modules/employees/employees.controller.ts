@@ -3,11 +3,12 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
-  Req,
+  Query,
+  ParseIntPipe,
+  Put,
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
@@ -16,6 +17,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from 'generated/prisma/enums';
+import { QueryEmployeeDto } from './dto/query-employee.dto';
 
 @Controller('employees')
 export class EmployeesController {
@@ -31,25 +33,29 @@ export class EmployeesController {
   @Get()
   @Roles(UserRole.ADMIN, UserRole.HR)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  findAllEmployees() {
-    return this.employeesService.handleFindAllEmployees();
+  findAllEmployees(@Query() query: QueryEmployeeDto) {
+    return this.employeesService.handleFindAllEmployees(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.employeesService.findOne(+id);
+  @Roles(UserRole.ADMIN, UserRole.HR)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  fineOneEmployee(@Param('id', ParseIntPipe) id: number) {
+    return this.employeesService.handleFindOneEmployee(id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @Put(':id')
+  @Roles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  updateEmployee(
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateEmployeeDto: UpdateEmployeeDto,
   ) {
-    return this.employeesService.update(+id, updateEmployeeDto);
+    return this.employeesService.handleUpdateEmployee(id, updateEmployeeDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.employeesService.remove(+id);
+  deleteEmployee(@Param('id', ParseIntPipe) id: number) {
+    return this.employeesService.handleDeleteEmployee(id);
   }
 }
