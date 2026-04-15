@@ -44,7 +44,7 @@ refactor(departments): extract validation logic to service layer
 chore(prisma): add hashed_refresh_token field to User model
 ```
 
-### Ví dụ commit tệ ❌
+### Ví dụ commit tệ
 
 ```
 update code

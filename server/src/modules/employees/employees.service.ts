@@ -216,11 +216,6 @@ export class EmployeesService {
     return this.prisma.employee.update({
       where: { id },
       data: { status: EmployeeStatus.INACTIVE },
-      select: {
-        id: true,
-        employeeCode: true,
-        status: true,
-      },
     });
   }
 }
