@@ -6,12 +6,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
 import { UsersService } from '../users/users.service';
-import {
-  comparePassword,
-  hashPassword,
-} from 'src/common/utils/hash-password.util';
+import { comparePassword } from 'src/common/utils/hash-password.util';
 import { JwtService } from '@nestjs/jwt';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import type { ConfigType } from '@nestjs/config';
@@ -24,31 +20,6 @@ export class AuthService {
     @Inject(refreshJwtConfig.KEY)
     private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
-
-  async handleRegister(registerDto: RegisterDto) {
-    // 1. Check existing user
-    const existingUser = await this.usersService.findUserByEmail(
-      registerDto.email,
-    );
-
-    if (existingUser) {
-      throw new BadRequestException(
-        'This email address already exists in the system. Please log in or choose a different email address.',
-      );
-    }
-
-    // 2. Hash Password
-    const hashedPassword: string = await hashPassword(registerDto.password);
-
-    // 3. Create new user
-    const newUser = await this.usersService.createUser({
-      email: registerDto.email,
-      fullName: registerDto.fullName,
-      password: hashedPassword,
-    });
-
-    return newUser;
-  }
 
   async validateUser(loginDto: LoginDto) {
     const existingUser = await this.usersService.findUserByEmail(
@@ -108,7 +79,13 @@ export class AuthService {
   }
 
   async generateTokens(user: any) {
-    const payload = { id: user.id, email: user.email, role: user.role };
+    const payload = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      employeeId: user.employee?.id,
+    };
+
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload),
       this.jwtService.signAsync(payload, this.refreshTokenConfig),

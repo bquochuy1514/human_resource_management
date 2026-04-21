@@ -86,30 +86,32 @@ model Employee {
   reviewedLeaves    LeaveRequest[] @relation("ReviewerLeaves")
 }
 
-enum AttendanceStatus {
-  ON_TIME      
-  LATE         
-  EARLY_LEAVE  
-  OVERTIME     
-  ABSENT      
+enum CheckInStatus {
+  ON_TIME
+  LATE
+}
+
+enum CheckOutStatus {
+  ON_TIME
+  EARLY_LEAVE
+  OVERTIME
 }
 
 model Attendance {
-  id           Int              @id @default(autoincrement())
-  employeeId   Int
-  date         DateTime         @db.Date
-  checkIn      DateTime?
-  checkOut     DateTime?
-  workingHours Decimal?         @db.Decimal(4, 2)  // 8.50 = 8.5 giờ
-  status       AttendanceStatus @default(ON_TIME)
-  note         String?
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  id             Int            @id @default(autoincrement())
+  employeeId     Int
+  date           DateTime       @db.Date
+  checkIn        DateTime?
+  checkOut       DateTime?
+  checkInStatus  CheckInStatus?  // nullable vì có thể absent
+  checkOutStatus CheckOutStatus? // nullable vì chưa checkout
+  isAbsent       Boolean        @default(false)
+  workingHours   Decimal?       @db.Decimal(4, 2)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
-  // Relations
-  employee     Employee         @relation(fields: [employeeId], references: [id])
+  employee       Employee       @relation(fields: [employeeId], references: [id])
 
-  // 1 nhân viên chỉ có 1 record mỗi ngày
   @@unique([employeeId, date])
 }
 

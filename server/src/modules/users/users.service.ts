@@ -8,7 +8,10 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   findUserByEmail(email: string) {
-    return this.prisma.user.findUnique({ where: { email } });
+    return this.prisma.user.findUnique({
+      where: { email },
+      include: { employee: { select: { id: true } } },
+    });
   }
 
   findUserById(id: number) {
