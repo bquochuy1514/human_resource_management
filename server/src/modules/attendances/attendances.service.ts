@@ -87,7 +87,10 @@ export class AttendancesService {
   }
 
   async handleCheckIn(employeeId: number, dto: CheckInDto) {
-    const now = dto.overrideTime ? new Date(dto.overrideTime) : new Date();
+    const now =
+      dto.overrideTime && process.env.NODE_ENV !== 'production'
+        ? new Date(dto.overrideTime)
+        : new Date();
     const localDate = now.toLocaleDateString('en-CA', {
       timeZone: 'Asia/Ho_Chi_Minh',
     });
@@ -123,7 +126,10 @@ export class AttendancesService {
   }
 
   async handleCheckOut(employeeId: number, dto: CheckOutDto) {
-    const now = dto.overrideTime ? new Date(dto.overrideTime) : new Date();
+    const now =
+      dto.overrideTime && process.env.NODE_ENV !== 'production'
+        ? new Date(dto.overrideTime)
+        : new Date();
     const localDate = now.toLocaleDateString('en-CA', {
       timeZone: 'Asia/Ho_Chi_Minh',
     });

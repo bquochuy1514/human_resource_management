@@ -8,6 +8,7 @@ import { PrismaService } from './prisma.service';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { AttendancesModule } from './modules/attendances/attendances.module';
+import { LeaveRequestsModule } from './modules/leave-requests/leave-requests.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AttendancesModule } from './modules/attendances/attendances.module';
     EmployeesModule,
     DepartmentsModule,
     AttendancesModule,
+    LeaveRequestsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
